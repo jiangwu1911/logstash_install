@@ -86,13 +86,12 @@ function install_and_config_logstash() {
     sed -i "s/^node .*/node '$HOSTNAME' {/" manifests/site.pp
 
     # Modify node.name in elasticsearch's config file
-    number=`echo $RANDOM`
-    sed -i "s/^cluster.name:.*/cluster.name: logstash$number/" modules/logstash/files/elasticsearch.yml
+    sed -i "s/^cluster.name:.*/cluster.name: logstash_$HOSTNAME/" modules/logstash/files/elasticsearch.yml
     sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" modules/logstash/files/elasticsearch.yml
 
     # Modify redis IP address in logstash config file
     sed -i "s/host => .*/host => \"$IPADDR\"/"  modules/logstash/files/central.conf
-    sed -i "s/cluster => .*/cluster => \"logstash$number\"/"  modules/logstash/files/central.conf
+    sed -i "s/cluster => .*/cluster => \"logstash_$HOSTNAME\"/"  modules/logstash/files/central.conf
 
     # Call 'puppet apply' to install logstash
     ./pupply
