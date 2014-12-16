@@ -20,6 +20,7 @@ createrepo -g comps.xml $ISODIR
 createrepo $ISODIR/software
 rm -rf $ISODIR/software/conf
 cp -r conf $ISODIR/software/
+cp -r logstash_puppet $ISODIR/software/
 
 mkdir -p $ISODIR/ks
 /bin/cp ks.cfg $ISODIR/ks

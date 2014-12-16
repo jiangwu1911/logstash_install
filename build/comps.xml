@@ -210,6 +210,7 @@
       <packagereq type='mandatory'>ntpdate</packagereq>
       <packagereq type='mandatory'>ntp</packagereq>
       <packagereq type='mandatory'>net-tools</packagereq>
+      <packagereq type='mandatory'>puppet</packagereq>
     </packagelist>
   </group>
 
