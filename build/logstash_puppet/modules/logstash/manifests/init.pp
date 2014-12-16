@@ -36,4 +36,17 @@ class logstash {
         enable => true,
         require => Package['elasticsearch'],
     }
+
+    file { '/etc/elasticsearch/elasticsearch.yml':
+        source => 'puppet:///modules/logstash/elasticsearch.yml',
+        notify => Service['elasticsearch'],
+    }
+    file { '/etc/logstash/conf.d/central.conf':
+        source => 'puppet:///modules/logstash/central.conf',
+        notify => Service['logstash'],
+    }
+    file { '/etc/redis.conf':
+        source => 'puppet:///modules/logstash/redis.conf',
+        notify => Service['redis'],
+    }
 }

@@ -1,3 +1,3 @@
-node 'logstash' {
+node 'logstashserver' {
     include logstash
 }

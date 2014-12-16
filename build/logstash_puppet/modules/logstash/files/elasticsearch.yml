@@ -37,7 +37,7 @@ cluster.name: logstash
 # Node names are generated dynamically on startup, so you're relieved
 # from configuring them manually. You can tie this node to a specific name:
 #
-node.name: "logserver"
+node.name: "logstashserver"
 
 # Every node can be configured to allow or deny being eligible as the master,
 # and to allow or deny to store the data.
@@ -200,7 +200,7 @@ node.name: "logserver"
 
 # Set the bind address specifically (IPv4 or IPv6):
 #
-network.bind_host: 0.0.0.0
+#network.bind_host: 192.168.0.1
 
 # Set the address other nodes will use to communicate with this node. If not
 # set, it is automatically derived. It must point to an actual IP address.
@@ -383,6 +383,3 @@ network.bind_host: 0.0.0.0
 # it unless you need it is recommended (it is disabled by default).
 #
 #http.jsonp.enable: true
-
-http.cors.enabled: true
-http.cors.allow-origin: "*"
