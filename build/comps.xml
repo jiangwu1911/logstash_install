@@ -211,6 +211,8 @@
       <packagereq type='mandatory'>ntp</packagereq>
       <packagereq type='mandatory'>net-tools</packagereq>
       <packagereq type='mandatory'>puppet</packagereq>
+      <packagereq type='mandatory'>fbterm</packagereq>
+      <packagereq type='mandatory'>cjkuni-uming-fonts</packagereq>
     </packagelist>
   </group>
 
