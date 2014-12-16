@@ -99,6 +99,8 @@ function install_and_config_logstash() {
     # Current puppet cannot restart logstash, have to restart it manually
     service logstash restart
     service logstash-web restart
+    chkconfig logstash on
+    chkconfig logstash-web on
 
     popd >/dev/null
 }
