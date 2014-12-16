@@ -46,19 +46,13 @@ function config_network() {
         get_input 'IP地址' $ip IPADDR
         get_input '掩码' $netmask NETMASK
         get_input '网关地址' $gateway GATEWAY
-        SUBNET=$(echo $IPADDR | cut -d. -f1-3)'.0'
-        dhcp_start=$(echo $IPADDR | cut -d. -f1-3)'.100'
-        dhcp_end=$(echo $IPADDR | cut -d. -f1-3)'.254'
-        get_input 'DHCP起始地址' $dhcp_start DHCP_START
-        get_input 'DHCP结束地址' $dhcp_end DHCP_END
 
         echo -e "\n输入的网络配置参数:" 
         echo "    Hostname: $HOSTNAME" 
         echo "    IP地址: $IPADDR" 
         echo "    掩码: $NETMASK" 
         echo "    网关地址: $GATEWAY" 
-        echo "    DHCP起始地址: $DHCP_START" 
-        echo -e "    DHCP结束地址: $DHCP_END\n" 
+        echo ""
 
         answer_yes_or_no "请确认以上信息是否正确:" ANSWER
         if [ "$ANSWER" = "yes" ]; then
@@ -76,11 +70,40 @@ ONBOOT="yes"
 EOF
     cat > /etc/sysconfig/network <<EOF
 NETWORKING=yes
-HOSTNAME=$HOSTNAME
 GATEWAY=$GATEWAY
 EOF
-    sed -i "s/^hosts:.*/hosts: files/" /etc/nsswitch.conf
+    cat > /etc/hostname <<EOF
+$HOSTNAME
+EOF
+    hostname $HOSTNAME
     service network restart    
 }
 
+
+function install_and_config_logstash() {
+    pushd ~/software/logstash_puppet >/dev/null
+
+    sed -i "s/^node .*/node '$HOSTNAME' {/" manifests/site.pp
+
+    # Modify node.name in elasticsearch's config file
+    number=`echo $RANDOM`
+    sed -i "s/^cluster.name:.*/cluster.name: logstash$number/" modules/logstash/files/elasticsearch.yml
+    sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" modules/logstash/files/elasticsearch.yml
+
+    # Modify redis IP address in logstash config file
+    sed -i "s/host => .*/host => \"$IPADDR\"/"  modules/logstash/files/central.conf
+    sed -i "s/cluster => .*/cluster => \"logstash$number\"/"  modules/logstash/files/central.conf
+
+    # Call 'puppet apply' to install logstash
+    ./pupply
+    
+    # Current puppet cannot restart logstash, have to restart it manually
+    service logstash restart
+    service logstash-web restart
+
+    popd >/dev/null
+}
+
 config_network
+install_and_config_logstash
+
