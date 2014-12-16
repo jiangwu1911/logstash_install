@@ -1,4 +1,4 @@
-node 'logstash' {
+class logstash {
     package { 'logstash':
         ensure => installed,
     }
@@ -17,6 +17,8 @@ node 'logstash' {
         ensure => running,
         enable => true,
         require => Package['logstash'],
+        start => '/usr/sbin/service logstash start',
+        stop => '/usr/sbin/service logstash stop',
         restart => '/usr/sbin/service logstash restart',
         status => '/usr/sbin/service logstash status',
     }
@@ -24,6 +26,8 @@ node 'logstash' {
         ensure => running,
         enable => true,
         require => Package['logstash'],
+        start => '/usr/sbin/service logstash-web start',
+        stop => '/usr/sbin/service logstash-web stop',
         restart => '/usr/sbin/service logstash-web restart',
         status => '/usr/sbin/service logstash-web status',
     }
