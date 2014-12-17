@@ -98,7 +98,8 @@ function install_and_config_logstash() {
 
     # Install kibana-authentication-proxy
     pushd /opt/logstash/vendor >/dev/null
-    tar zvxf /root/software/kibana-authentication-proxy.tgz
+    rm -rf kibana-authentication-proxy
+    tar zvxf /root/software/kibana-authentication-proxy.tgz >/dev/null
     chown -R logstash:logstash kibana-authentication-proxy
     popd > /dev/null
     

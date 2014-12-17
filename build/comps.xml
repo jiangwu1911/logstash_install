@@ -213,6 +213,7 @@
       <packagereq type='mandatory'>puppet</packagereq>
       <packagereq type='mandatory'>fbterm</packagereq>
       <packagereq type='mandatory'>cjkuni-uming-fonts</packagereq>
+      <packagereq type='mandatory'>nodejs</packagereq>
     </packagelist>
   </group>
 
