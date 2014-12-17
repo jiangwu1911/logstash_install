@@ -90,11 +90,17 @@ function install_and_config_logstash() {
     sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" modules/logstash/files/elasticsearch.yml
 
     # Modify redis IP address in logstash config file
-    sed -i "s/host => .*/host => \"$IPADDR\"/"  modules/logstash/files/central.conf
+    sed -i "s/host => REDIS_IP/host => \"$IPADDR\"/"  modules/logstash/files/central.conf
     sed -i "s/cluster => .*/cluster => \"logstash_$HOSTNAME\"/"  modules/logstash/files/central.conf
 
     # Call 'puppet apply' to install logstash
     ./pupply
+
+    # Install kibana-authentication-proxy
+    pushd /opt/logstash/vendor >/dev/null
+    tar zvxf /root/software/kibana-authentication-proxy.tgz
+    chown -R logstash:logstash kibana-authentication-proxy
+    popd > /dev/null
     
     # Current puppet cannot restart logstash, have to restart it manually
     service logstash restart
