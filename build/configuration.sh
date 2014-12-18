@@ -93,16 +93,17 @@ function install_and_config_logstash() {
     sed -i "s/host => REDIS_IP/host => \"$IPADDR\"/"  modules/logstash/files/central.conf
     sed -i "s/cluster => .*/cluster => \"logstash_$HOSTNAME\"/"  modules/logstash/files/central.conf
 
+    # Install kibana-authentication-proxy
+    if [ ! -e /opt/kibana-authentication-proxy ]; then
+        pushd /opt >/dev/null
+        tar zvxf /root/software/kibana-authentication-proxy.tgz >/dev/null
+        chown -R logstash:logstash kibana-authentication-proxy
+        popd > /dev/null
+    fi
+
     # Call 'puppet apply' to install logstash
     ./pupply
 
-    # Install kibana-authentication-proxy
-    pushd /opt/logstash/vendor >/dev/null
-    rm -rf kibana-authentication-proxy
-    tar zvxf /root/software/kibana-authentication-proxy.tgz >/dev/null
-    chown -R logstash:logstash kibana-authentication-proxy
-    popd > /dev/null
-    
     # Current puppet cannot restart logstash, have to restart it manually
     service logstash restart
     service logstash-web restart
@@ -114,4 +115,3 @@ function install_and_config_logstash() {
 
 config_network
 install_and_config_logstash
-
