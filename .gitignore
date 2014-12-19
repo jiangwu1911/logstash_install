@@ -56,3 +56,4 @@ target/
 iso
 centos7
 *.iso
+*.rpm
