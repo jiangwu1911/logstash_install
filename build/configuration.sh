@@ -97,7 +97,6 @@ function install_and_config_logstash() {
     if [ ! -e /opt/kibana-authentication-proxy ]; then
         pushd /opt >/dev/null
         tar zvxf /root/software/kibana-authentication-proxy.tgz >/dev/null
-        chown -R logstash:logstash kibana-authentication-proxy
         popd > /dev/null
     fi
 
@@ -105,6 +104,7 @@ function install_and_config_logstash() {
     ./pupply
 
     # Current puppet cannot restart logstash, have to restart it manually
+    chown -R logstash:logstash /opt/kibana-authentication-proxy
     service logstash restart
     service logstash-web restart
     chkconfig logstash on
