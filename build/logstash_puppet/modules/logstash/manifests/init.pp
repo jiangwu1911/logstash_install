@@ -39,6 +39,9 @@ class logstash {
     file { '/etc/logstash/conf.d/central.conf':
         source => 'puppet:///modules/logstash/central.conf',
     }
+    file { '/etc/init.d/logstash':
+        source => 'puppet:///modules/logstash/logstash',
+    }
     file { '/etc/init.d/logstash-web':
         source => 'puppet:///modules/logstash/logstash-web',
     }
