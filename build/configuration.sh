@@ -1,11 +1,11 @@
 #!/bin/sh
 
 function get_input() {
-    read -p "$1 (缺省: $2): " VAR
+    read -p "$1 (缺省: $3): " VAR
     if [ -z $VAR ]; then
-        VAR=$2
+        VAR=$3
     fi
-    eval $3=$VAR
+    eval $2=$VAR
 }
 
 function answer_yes_or_no() {
@@ -30,8 +30,7 @@ function config_network() {
         splash_screen
 
         echo -e "开始配置网络:\n"
-        default_route=$(ip route show)
-        default_interface=$(echo $default_route | sed -e 's/^.*dev \([^ ]*\).*$/\1/' | head -n 1)
+        default_interface=$(ip link show  | grep -v '^\s' | cut -d':' -f2 | sed 's/ //g' | grep -v lo | head -1)
         address=$(ip addr show label $default_interface scope global | awk '$1 == "inet" { print $2,$4}')
         ip=$(echo $address | awk '{print $1 }')
         ip=${ip%%/*}
@@ -41,12 +40,12 @@ function config_network() {
         hostname=`hostname`
         dns=$(cat /etc/resolv.conf | grep nameserver | head -n 1 | awk '{print $2}')
 
-        get_input '请输入Hostname' $hostname HOSTNAME 
-        get_input '选择提供日志服务的网卡' $default_interface INTERFACE
-        get_input 'IP地址' $ip IPADDR
-        get_input '掩码' $netmask NETMASK
-        get_input '网关地址' $gateway GATEWAY
-        get_input 'DNS服务器地址' $gateway DNS1
+        get_input '请输入Hostname' HOSTNAME $hostname 
+        get_input '选择提供日志服务的网卡' INTERFACE $default_interface 
+        get_input 'IP地址' IPADDR $ip
+        get_input '掩码' NETMASK $netmask
+        get_input '网关地址' GATEWAY $gateway
+        get_input 'DNS服务器地址' DNS1 $gateway
 
         echo -e "\n输入的网络配置参数:" 
         echo "    Hostname: $HOSTNAME" 
