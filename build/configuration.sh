@@ -46,12 +46,14 @@ function config_network() {
         get_input 'IP地址' $ip IPADDR
         get_input '掩码' $netmask NETMASK
         get_input '网关地址' $gateway GATEWAY
+        get_input 'DNS服务器地址' $gateway DNS1
 
         echo -e "\n输入的网络配置参数:" 
         echo "    Hostname: $HOSTNAME" 
         echo "    IP地址: $IPADDR" 
         echo "    掩码: $NETMASK" 
         echo "    网关地址: $GATEWAY" 
+        echo "    DNS服务器地址: $DNS1"
         echo ""
 
         answer_yes_or_no "请确认以上信息是否正确:" ANSWER
@@ -71,6 +73,7 @@ EOF
     cat > /etc/sysconfig/network <<EOF
 NETWORKING=yes
 GATEWAY=$GATEWAY
+DNS1=$DNS1
 EOF
     cat > /etc/hostname <<EOF
 $HOSTNAME
