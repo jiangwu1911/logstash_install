@@ -1,13 +1,7 @@
 class logstash {
-    package { 'logstash':
-        ensure => installed,
-        allow_virtual => false,
-    }
-    package { 'logstash-contrib':
-        ensure => installed,
-        allow_virtual => false,
-    }
-    package { 'elasticsearch':
+    package { ['logstash', 
+               'logstash-contrib',
+               'elasticsearch]:
         ensure => installed,
         allow_virtual => false,
     }

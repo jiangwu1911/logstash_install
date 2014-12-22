@@ -90,7 +90,7 @@ function install_and_config_logstash() {
     sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" modules/logstash/files/elasticsearch.yml
 
     # Modify redis IP address in logstash config file
-    sed -i "s/host => REDIS_IP/host => \"$IPADDR\"/"  modules/logstash/files/central.conf
+    sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  modules/logstash/files/central.conf
     sed -i "s/cluster => .*/cluster => \"logstash_$HOSTNAME\"/"  modules/logstash/files/central.conf
 
     # Install kibana-authentication-proxy
