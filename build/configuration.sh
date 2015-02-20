@@ -68,6 +68,7 @@ GATEWAY="$GATEWAY"
 IPADDR="$IPADDR"
 NETMASK="$NETMASK"
 ONBOOT="yes"
+DNS1="8.8.8.8"
 EOF
     cat > /etc/sysconfig/network <<EOF
 NETWORKING=yes
