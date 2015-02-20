@@ -97,7 +97,7 @@ function install_and_config_logstash() {
     # Install kibana 4.0
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/software/kibana-4.0.0-linux-x64.tar.gz >/dev/null
+        tar zvxf /root/software/packages/kibana-4.0.0-linux-x64.tar.gz >/dev/null
         mv kibana-4.0.0-linux-x64 kibana
         popd > /dev/null
     fi
@@ -106,7 +106,7 @@ function install_and_config_logstash() {
     ./pupply
 
     # Current puppet cannot restart logstash, have to restart it manually
-    chown -R logstash:logstash /opt/kibana-authentication-proxy
+    chown -R logstash:logstash /opt/kibana
     service logstash restart
     service logstash-web restart
     chkconfig logstash on
