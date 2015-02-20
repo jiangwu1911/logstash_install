@@ -94,10 +94,11 @@ function install_and_config_logstash() {
     sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  modules/logstash/files/central.conf
     sed -i "s/cluster => .*/cluster => \"logstash_$HOSTNAME\"/"  modules/logstash/files/central.conf
 
-    # Install kibana-authentication-proxy
-    if [ ! -e /opt/kibana-authentication-proxy ]; then
+    # Install kibana 4.0
+    if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/software/kibana-authentication-proxy.tgz >/dev/null
+        tar zvxf /root/software/kibana-4.0.0-linux-x64.tar.gz >/dev/null
+        mv kibana-4.0.0-linux-x64 kibana
         popd > /dev/null
     fi
 
