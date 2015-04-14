@@ -98,8 +98,8 @@ function install_and_config_logstash() {
     # Install kibana 4.0
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/software/packages/kibana-4.0.1-linux-x64.tar.gz >/dev/null
-        mv kibana-4.0.1-linux-x64 kibana
+        tar zvxf /root/software/packages/kibana-4.0.2-linux-x64.tar.gz >/dev/null
+        mv kibana-4.0.2-linux-x64 kibana
         popd > /dev/null
     fi
 
