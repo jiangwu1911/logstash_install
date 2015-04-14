@@ -88,18 +88,18 @@ function install_and_config_logstash() {
     sed -i "s/^node .*/node '$HOSTNAME' {/" manifests/site.pp
 
     # Modify node.name in elasticsearch's config file
-    sed -i "s/^cluster.name:.*/cluster.name: logstash_$HOSTNAME/" modules/logstash/files/elasticsearch.yml
+    sed -i "s/^cluster.name:.*/cluster.name: metalog/" modules/logstash/files/elasticsearch.yml
     sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" modules/logstash/files/elasticsearch.yml
 
     # Modify redis IP address in logstash config file
     sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  modules/logstash/files/central.conf
-    sed -i "s/cluster => .*/cluster => \"logstash_$HOSTNAME\"/"  modules/logstash/files/central.conf
+    sed -i "s/cluster => .*/cluster => \"metalog\"/"  modules/logstash/files/central.conf
 
     # Install kibana 4.0
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/software/packages/kibana-4.0.0-linux-x64.tar.gz >/dev/null
-        mv kibana-4.0.0-linux-x64 kibana
+        tar zvxf /root/software/packages/kibana-4.0.1-linux-x64.tar.gz >/dev/null
+        mv kibana-4.0.1-linux-x64 kibana
         popd > /dev/null
     fi
 

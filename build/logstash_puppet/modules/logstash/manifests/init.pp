@@ -10,16 +10,16 @@ class logstash {
         ensure => running,
         enable => true,
     }
-#    service { 'logstash':
-#        ensure => running,
-#        enable => true,
-#        require => Package['logstash'],
-#    }
-#    service { 'logstash-web':
-#        ensure => running,
-#        enable => true,
-#        require => Package['logstash'],
-#    }
+    service { 'logstash':
+        ensure => running,
+        enable => true,
+        require => Package['logstash'],
+    }
+    service { 'logstash-web':
+        ensure => running,
+        enable => true,
+        require => Package['logstash'],
+    }
     service { 'elasticsearch':
         ensure => running,
         enable => true,

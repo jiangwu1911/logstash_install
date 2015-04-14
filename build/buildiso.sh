@@ -18,8 +18,6 @@ createrepo -g comps.xml $ISODIR
 
 # logstash packages
 createrepo $ISODIR/software
-rm -rf $ISODIR/software/conf
-cp -r conf $ISODIR/software/
 cp -r logstash_puppet $ISODIR/software/
 cp configuration.sh $ISODIR/software/
 
