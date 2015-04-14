@@ -113,6 +113,10 @@ function install_and_config_logstash() {
     chkconfig logstash on
     chkconfig logstash-web on
 
+    # Redirect local syslog to logstash
+    sed -i "s/#\*\.\* @@remote-host:514/*.* @@127.0.0.1:5514/" /etc/rsyslog.conf
+    systemctl restart rsyslog
+
     popd >/dev/null
 }
 
