@@ -205,7 +205,7 @@
     <default>true</default>
     <uservisible>false</uservisible>
     <packagelist>
-      <packagereq type='mandatory'>java-1.7.0-openjdk</packagereq>
+      <packagereq type='mandatory'>java-1.8.0-openjdk</packagereq>
       <packagereq type='mandatory'>redis</packagereq>
       <packagereq type='mandatory'>ntpdate</packagereq>
       <packagereq type='mandatory'>ntp</packagereq>
