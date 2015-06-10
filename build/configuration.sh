@@ -77,6 +77,10 @@ EOF
     cat > /etc/hostname <<EOF
 $HOSTNAME
 EOF
+    cat >> /etc/hosts <<EOF
+$IPADDR $HOSTNAME
+EOF
+
     hostname $HOSTNAME
     service network restart    
 }
@@ -97,11 +101,11 @@ function install_and_config_logstash() {
     sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  modules/logstash/files/central.conf
     sed -i "s/cluster => .*/cluster => \"metalog\"/"  modules/logstash/files/central.conf
 
-    # Install kibana 4.0
+    # Install kibana 4.1
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/software/packages/kibana-4.0.2-linux-x64.tar.gz >/dev/null
-        mv kibana-4.0.2-linux-x64 kibana
+        tar zvxf /root/software/packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
+        mv kibana-4.1.1-linux-x64 kibana
         popd > /dev/null
     fi
 
