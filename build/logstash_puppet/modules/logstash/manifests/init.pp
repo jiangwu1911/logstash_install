@@ -1,6 +1,5 @@
 class logstash {
     package { ['logstash', 
-               'logstash-contrib',
                'elasticsearch']:
         ensure => installed,
         allow_virtual => false,
