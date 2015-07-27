@@ -1,3 +1,0 @@
-node 'logstashserver' {
-    include logstash
-}

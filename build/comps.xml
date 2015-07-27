@@ -214,7 +214,6 @@
       <packagereq type='mandatory'>fbterm</packagereq>
       <packagereq type='mandatory'>cjkuni-uming-fonts</packagereq>
       <packagereq type='mandatory'>yum-utils</packagereq>
-      <packagereq type='mandatory'>puppet</packagereq>
     </packagelist>
   </group>
 

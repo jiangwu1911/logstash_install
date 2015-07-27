@@ -1,5 +1,7 @@
 #!/bin/sh
 
+CLUSTER_NAME="metalog"
+
 function get_input() {
     read -p "$1 (缺省: $3): " VAR
     if [ -z $VAR ]; then
@@ -87,44 +89,54 @@ EOF
 
 
 function install_and_config_logstash() {
-    rm -f /etc/yum.repos.d/Cent*
-
-    pushd ~/software/logstash_puppet >/dev/null
-
-    sed -i "s/^node .*/node '$HOSTNAME' {/" manifests/site.pp
+    pushd ~/logstash >/dev/null
 
     # Modify node.name in elasticsearch's config file
-    sed -i "s/^cluster.name:.*/cluster.name: metalog/" modules/logstash/files/elasticsearch.yml
-    sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" modules/logstash/files/elasticsearch.yml
+    sed -i "s/^cluster.name:.*/cluster.name: $CLUSTER_NAME/" files/elasticsearch.yml
+    sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" files/elasticsearch.yml
 
     # Modify redis IP address in logstash config file
-    sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  modules/logstash/files/central.conf
-    sed -i "s/cluster => .*/cluster => \"metalog\"/"  modules/logstash/files/central.conf
+    sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  files/central.conf
+    sed -i "s/cluster => .*/cluster => \"$CLUSTER_NAME\"/"  files/central.conf
+
+    # Install elasticsearch
+    yum install -y elasticsearch
+    cp -f files/elasticsearch.yml /etc/elasticsearch
+    systemctl enable elasticsearch
+    systemctl restart elasticsearch
+ 
+    # Install logstash 
+    yum install -y logstash
+    cp -f files/central.conf /etc/logstash/conf.d
+    systemctl enable logstash 
+    systemctl restart logstash
+
+    # Install redis
+    yum install -y redis
+    cp files/redis.conf /etc 
+    systemctl enable redis
+    systemctl restart redis
 
     # Install kibana 4.1
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/software/packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
+        tar zvxf packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
         mv kibana-4.1.1-linux-x64 kibana
         popd > /dev/null
     fi
-
-    # Call 'puppet apply' to install logstash
-    ./pupply
-
-    # Current puppet cannot restart logstash, have to restart it manually
     chown -R logstash:logstash /opt/kibana
-    service logstash restart
-    service logstash-web restart
-    chkconfig logstash on
+    cp -f files/logstash-web /etc/init.d
     chkconfig logstash-web on
-
-    # Redirect local syslog to logstash
-    sed -i "s/#\*\.\* @@remote-host:514/*.* @@127.0.0.1:5514/" /etc/rsyslog.conf
-    systemctl restart rsyslog
+    service logstash-web restart
 
     popd >/dev/null
 }
 
+function redirect_syslog_to_logstash() {
+    sed -i "s/#\*\.\* @@remote-host:514/*.* @@127.0.0.1:5514/" /etc/rsyslog.conf
+    systemctl restart rsyslog
+}
+
 config_network
 install_and_config_logstash
+redirect_syslog_to_logstash

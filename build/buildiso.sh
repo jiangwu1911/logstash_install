@@ -17,10 +17,10 @@ rm -rf $ISODIR/repodata/
 createrepo -g comps.xml $ISODIR
 
 # logstash packages
-createrepo $ISODIR/software
-cp -r logstash_puppet $ISODIR/software/
-cp configuration.sh $ISODIR/software/
-cp config_network.sh $ISODIR/software/
+createrepo $ISODIR
+cp -r logstash $ISODIR
+cp configuration.sh $ISODIR
+cp config_network.sh $ISODIR
 
 mkdir -p $ISODIR/ks
 /bin/cp ks.cfg $ISODIR/ks
