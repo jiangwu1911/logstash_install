@@ -1,6 +1,7 @@
 #!/bin/sh
 
 CLUSTER_NAME="metalog"
+NTPSERVER="1.cn.pool.ntp.org"
 
 dt=`date '+%Y%m%d-%H%M%S'`
 currentdir=`pwd`
@@ -93,6 +94,8 @@ EOF
 
 function install_logstash() {
     echo -ne "\n开始安装logstash日志服务器......      "
+
+    ntpdate $NTPSERVER; clock -w
 
     pushd ~/logserver >/dev/null
 
@@ -219,5 +222,5 @@ function redirect_syslog_to_logstash() {
 
 config_network
 install_logstash
-redirect_syslog_to_logstash
 config_logstash
+#redirect_syslog_to_logstash
