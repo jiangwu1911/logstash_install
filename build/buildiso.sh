@@ -19,7 +19,7 @@ createrepo -g comps.xml $ISODIR
 # logstash packages
 createrepo $ISODIR/logserver
 cp -r logserver $ISODIR
-cp configuration.sh $ISODIR
+cp install.sh $ISODIR
 cp config_network.sh $ISODIR
 
 mkdir -p $ISODIR/ks
