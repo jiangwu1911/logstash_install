@@ -215,6 +215,7 @@
       <packagereq type='mandatory'>cjkuni-uming-fonts</packagereq>
       <packagereq type='mandatory'>yum-utils</packagereq>
       <packagereq type='mandatory'>telnet</packagereq>
+      <packagereq type='mandatory'>crudini</packagereq>
     </packagelist>
   </group>
 

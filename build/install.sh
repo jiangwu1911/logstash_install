@@ -95,7 +95,7 @@ EOF
 function install_logstash() {
     echo -ne "\n开始安装logstash日志服务器......      "
 
-    ntpdate $NTPSERVER; clock -w
+    ntpdate $NTPSERVER >/dev/null; clock -w >/dev/null
 
     pushd ~/logserver >/dev/null
 
