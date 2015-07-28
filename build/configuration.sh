@@ -108,8 +108,8 @@ function install_and_config_logstash() {
     # Install logstash 
     yum install -y logstash
     cp -f files/central.conf /etc/logstash/conf.d
-    systemctl enable logstash 
-    systemctl restart logstash
+    chkconfig logstash on
+    service logstash restart
 
     # Install redis
     yum install -y redis
@@ -120,7 +120,7 @@ function install_and_config_logstash() {
     # Install kibana 4.1
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
+        tar zvxf /root/logserver/packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
         mv kibana-4.1.1-linux-x64 kibana
         popd > /dev/null
     fi
