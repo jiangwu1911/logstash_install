@@ -89,7 +89,7 @@ EOF
 
 
 function install_and_config_logstash() {
-    pushd ~/logstash >/dev/null
+    pushd ~/logserver >/dev/null
 
     # Modify node.name in elasticsearch's config file
     sed -i "s/^cluster.name:.*/cluster.name: $CLUSTER_NAME/" files/elasticsearch.yml

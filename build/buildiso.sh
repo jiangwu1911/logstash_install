@@ -17,7 +17,7 @@ rm -rf $ISODIR/repodata/
 createrepo -g comps.xml $ISODIR
 
 # logstash packages
-createrepo $ISODIR/software
+createrepo $ISODIR/logserver
 cp -r logstash $ISODIR
 cp configuration.sh $ISODIR
 cp config_network.sh $ISODIR
