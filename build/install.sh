@@ -2,6 +2,10 @@
 
 CLUSTER_NAME="metalog"
 
+dt=`date '+%Y%m%d-%H%M%S'`
+currentdir=`pwd`
+logfile="$currentdir/install_$dt.log"
+
 function get_input() {
     read -p "$1 (缺省: $3): " VAR
     if [ -z $VAR ]; then
@@ -47,7 +51,7 @@ function config_network() {
         get_input 'IP地址' IPADDR $ip
         get_input '掩码' NETMASK $netmask
         get_input '网关地址' GATEWAY $gateway
-        get_input 'DNS服务器地址' DNS1 $gateway
+        get_input 'DNS服务器地址' DNS1 $dns
 
         echo -e "\n输入的网络配置参数:" 
         echo "    Hostname: $HOSTNAME" 
@@ -87,8 +91,9 @@ EOF
     service network restart    
 }
 
+function install_logstash() {
+    echo -ne "\n开始安装logstash日志服务器......      "
 
-function install_and_config_logstash() {
     pushd ~/logserver >/dev/null
 
     # Modify node.name in elasticsearch's config file
@@ -100,22 +105,22 @@ function install_and_config_logstash() {
     sed -i "s/cluster => .*/cluster => \"$CLUSTER_NAME\"/"  files/central.conf
 
     # Install elasticsearch
-    yum install -y elasticsearch
+    yum install -y elasticsearch >> $logfile 2>&1
     cp -f files/elasticsearch.yml /etc/elasticsearch
-    systemctl enable elasticsearch
-    systemctl restart elasticsearch
- 
+    systemctl enable elasticsearch >> $logfile 2>&1
+    systemctl restart elasticsearch >> $logfile 2>&1
+
     # Install logstash 
-    yum install -y logstash
+    yum install -y logstash >> $logfile 2>&1
     cp -f files/central.conf /etc/logstash/conf.d
-    chkconfig logstash on
-    service logstash restart
+    chkconfig logstash on >> $logfile 2>&1
+    service logstash restart >> $logfile 2>&1
 
     # Install redis
-    yum install -y redis
+    yum install -y redis >> $logfile 2>&1
     cp files/redis.conf /etc 
-    systemctl enable redis
-    systemctl restart redis
+    systemctl enable redis >> $logfile 2>&1
+    systemctl restart redis >> $logfile 2>&1
 
     # Install kibana 4.1
     if [ ! -e /opt/kibana ]; then
@@ -126,10 +131,85 @@ function install_and_config_logstash() {
     fi
     chown -R logstash:logstash /opt/kibana
     cp -f files/logstash-web /etc/init.d
-    chkconfig logstash-web on
-    service logstash-web restart
+    chkconfig logstash-web on >> $logfile 2>&1
+    service logstash-web restart >> $logfile 2>&1
 
     popd >/dev/null
+    echo -e "完成。"
+}
+
+function config_lumberjack() {
+    if [ ! -e /etc/pki/tls/certs ]; then
+        mkdir -p /etc/pki/tls/certs
+    fi
+
+    if [ ! -e /etc/pki/tls/private ]; then
+        mkdir -p /etc/pki/tls/private
+    fi
+
+    if [ -n "$IPADDR" ]; then
+        default_interface=$(ip link show  | grep -v '^\s' | cut -d':' -f2 | sed 's/ //g' | grep -v lo | head -1)
+        address=$(ip addr show label $default_interface scope global | awk '$1 == "inet" { print $2,$4}')
+        ip=$(echo $address | awk '{print $1 }')
+        IPADDR=${ip%%/*}
+    fi
+    crudini --set /etc/pki/tls/openssl.cnf " v3_ca " subjectAltName "IP: $IPADDR"
+
+    pushd /etc/pki/tls >/dev/null
+    openssl req -config openssl.cnf -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt >> $logfile 2>&1
+    popd >/dev/null
+
+    cat >/etc/logstash/conf.d/01-lumberjack-input.conf <<EOF
+input {
+  lumberjack {
+    port => 5000
+    type => "logs"
+    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
+    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
+  }
+}
+EOF
+
+    cat >/etc/logstash/conf.d/30-lumberjack-output.conf <<EOF
+output {
+    elasticsearch {
+        cluster => "$CLUSTER_NAME"
+        host => "localhost"
+        port => "9300"
+    }
+}
+EOF
+}
+
+function config_nginx() {
+    if [ ! -e /opt/logstash/patterns ]; then
+        mkdir -p /opt/logstash/patterns
+    fi
+
+    cat > /opt/logstash/patterns/nginx <<EOF
+NGUSERNAME [a-zA-Z\.\@\-\+_%]+
+NGUSER %{NGUSERNAME}
+NGINXACCESS %{IPORHOST:clientip} %{NGUSER:ident} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}
+EOF
+    chown -R logstash:logstash /opt/logstash/patterns
+
+    cat >  /etc/logstash/conf.d/11-nginx.conf <<EOF
+filter {
+    if [type] == "nginx-access" {
+        grok {
+            match => { "message" => "%{NGINXACCESS}" }
+        }
+    }
+}
+EOF
+}
+
+function config_logstash() {
+    echo -ne "\n正在配置日志服务器......      "
+    config_lumberjack
+    config_nginx
+    systemctl restart logstash
+    echo -e "完成。"
 }
 
 function redirect_syslog_to_logstash() {
@@ -138,5 +218,6 @@ function redirect_syslog_to_logstash() {
 }
 
 config_network
-install_and_config_logstash
+install_logstash
 redirect_syslog_to_logstash
+config_logstash
