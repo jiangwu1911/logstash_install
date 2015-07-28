@@ -214,6 +214,7 @@
       <packagereq type='mandatory'>fbterm</packagereq>
       <packagereq type='mandatory'>cjkuni-uming-fonts</packagereq>
       <packagereq type='mandatory'>yum-utils</packagereq>
+      <packagereq type='mandatory'>telnet</packagereq>
     </packagelist>
   </group>
 
