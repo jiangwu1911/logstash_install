@@ -32,7 +32,8 @@ function config_logstash_forwarder() {
       "paths": [
         "/var/log/nginx/access.log"
        ],
-      "fields": { "type": "nginx-access" }
+      "fields": { "type": "nginx-access",
+                   "catalog": "web" }
     }
   ]
 }
