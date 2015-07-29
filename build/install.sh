@@ -174,16 +174,6 @@ NGUSER %{NGUSERNAME}
 NGINXACCESS %{IPORHOST:clientip} %{NGUSER:ident} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}
 EOF
     chown -R logstash:logstash /opt/logstash/patterns
-
-    cat >  /etc/logstash/conf.d/11-nginx.conf <<EOF
-filter {
-    if [type] == "nginx-access" {
-        grok {
-            match => { "message" => "%{NGINXACCESS}" }
-        }
-    }
-}
-EOF
 }
 
 function config_logstash() {
