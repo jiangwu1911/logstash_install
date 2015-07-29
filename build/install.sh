@@ -104,7 +104,7 @@ function install_logstash() {
     sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" files/elasticsearch.yml
 
     # Modify redis IP address in logstash config file
-    sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  files/central.conf
+    #sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  files/central.conf
     sed -i "s/cluster => .*/cluster => \"$CLUSTER_NAME\"/"  files/central.conf
 
     # Install elasticsearch
@@ -161,27 +161,6 @@ function config_lumberjack() {
     pushd /etc/pki/tls >/dev/null
     openssl req -config openssl.cnf -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt >> $logfile 2>&1
     popd >/dev/null
-
-    cat >/etc/logstash/conf.d/01-lumberjack-input.conf <<EOF
-input {
-  lumberjack {
-    port => 5000
-    type => "logs"
-    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
-    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
-  }
-}
-EOF
-
-    cat >/etc/logstash/conf.d/30-lumberjack-output.conf <<EOF
-output {
-    elasticsearch {
-        cluster => "$CLUSTER_NAME"
-        host => "localhost"
-        port => "9300"
-    }
-}
-EOF
 }
 
 function config_nginx() {
