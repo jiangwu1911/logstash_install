@@ -2,7 +2,7 @@
 
 CLUSTER_NAME="metalog"
 NTPSERVER="1.cn.pool.ntp.org"
-SRC_DIR="~/logserver"
+SRC_DIR="/root/logserver"
 
 dt=`date '+%Y%m%d-%H%M%S'`
 currentdir=`pwd`
@@ -165,6 +165,7 @@ function config_patterns() {
         mkdir -p /opt/logstash/patterns
     fi
     cp -f  $SRC_DIR/files/logstash_pattern/* /opt/logstash/patterns
+    rm -f /opt/logstash/patterns/TRANS.TBL
     chown -R logstash:logstash /opt/logstash/patterns
 }
 
