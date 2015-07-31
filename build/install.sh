@@ -2,6 +2,7 @@
 
 CLUSTER_NAME="metalog"
 NTPSERVER="1.cn.pool.ntp.org"
+SRC_DIR="~/logserver"
 
 dt=`date '+%Y%m%d-%H%M%S'`
 currentdir=`pwd`
@@ -97,15 +98,11 @@ function install_logstash() {
 
     ntpdate $NTPSERVER >/dev/null; clock -w >/dev/null
 
-    pushd ~/logserver >/dev/null
+    pushd $SRC_DIR >/dev/null
 
     # Modify node.name in elasticsearch's config file
     sed -i "s/^cluster.name:.*/cluster.name: $CLUSTER_NAME/" files/elasticsearch.yml
     sed -i "s/^node.name:.*/node.name: \"$HOSTNAME\"/" files/elasticsearch.yml
-
-    # Modify redis IP address in logstash config file
-    #sed -i "s/host => .*REDIS_IP/host => \"$IPADDR\" # REDIS_IP/"  files/central.conf
-    sed -i "s/cluster => .*/cluster => \"$CLUSTER_NAME\"/"  files/central.conf
 
     # Install elasticsearch
     yum install -y elasticsearch >> $logfile 2>&1
@@ -115,9 +112,9 @@ function install_logstash() {
 
     # Install logstash 
     yum install -y logstash >> $logfile 2>&1
-    cp -f files/central.conf /etc/logstash/conf.d
-    chkconfig logstash on >> $logfile 2>&1
-    service logstash restart >> $logfile 2>&1
+    cp -f files/logstash_config/*.conf /etc/logstash/conf.d
+    # Modify redis IP address in logstash config file
+    sed -i "s/cluster => .*/cluster => \"$CLUSTER_NAME\"/" /etc/logstash/conf.d/90_output_elasticsearch.conf
 
     # Install redis
     yum install -y redis >> $logfile 2>&1
@@ -128,7 +125,7 @@ function install_logstash() {
     # Install kibana 4.1
     if [ ! -e /opt/kibana ]; then
         pushd /opt >/dev/null
-        tar zvxf /root/logserver/packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
+        tar zvxf $SRC_DIR/packages/kibana-4.1.1-linux-x64.tar.gz >/dev/null
         mv kibana-4.1.1-linux-x64 kibana
         popd > /dev/null
     fi
@@ -163,24 +160,20 @@ function config_lumberjack() {
     popd >/dev/null
 }
 
-function config_nginx() {
+function config_patterns() {
     if [ ! -e /opt/logstash/patterns ]; then
         mkdir -p /opt/logstash/patterns
     fi
-
-    cat > /opt/logstash/patterns/nginx <<EOF
-NGUSERNAME [a-zA-Z\.\@\-\+_%]+
-NGUSER %{NGUSERNAME}
-NGINXACCESS %{IPORHOST:clientip} %{NGUSER:ident} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}
-EOF
+    cp -f  $SRC_DIR/files/logstash_pattern/* /opt/logstash/patterns
     chown -R logstash:logstash /opt/logstash/patterns
 }
 
 function config_logstash() {
     echo -ne "\n正在配置日志服务器......      "
     config_lumberjack
-    config_nginx
-    systemctl restart logstash
+    config_patterns
+    chkconfig logstash on >> $logfile 2>&1
+    systemctl restart logstash >> $logfile 2>&1
     echo -e "完成。"
 }
 
@@ -192,4 +185,4 @@ function redirect_syslog_to_logstash() {
 config_network
 install_logstash
 config_logstash
-#redirect_syslog_to_logstash
+redirect_syslog_to_logstash
